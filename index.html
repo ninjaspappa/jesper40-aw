@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>AW-padel – 39 + 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #0B6E4F;
+      --green-dark: #084C37;
+      --green-light: #E8F5F0;
+      --accent: #2ECC71;
+      --bg: #F7FAF9;
+      --card: #FFFFFF;
+      --text: #1A2E28;
+      --muted: #5A6B64;
+      --border: #D1E0DA;
+      --danger: #C0392B;
+      --maybe: #E67E22;
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(11, 110, 79, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 480px; margin: 0 auto; padding: 24px 20px 48px; }
+    .container.wide { max-width: 640px; }
+    header { text-align: center; margin-bottom: 32px; padding-top: 12px; }
+    .logo {
+      width: 64px; height: 64px; background: var(--green); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; box-shadow: var(--shadow);
+    }
+    .logo svg { width: 36px; height: 36px; fill: white; }
+    h1 { font-size: 1.75rem; font-weight: 700; color: var(--green-dark); letter-spacing: -0.02em; margin-bottom: 4px; }
+    .subtitle { font-size: 0.95rem; color: var(--muted); font-weight: 500; }
+    .card {
+      background: var(--card); border-radius: var(--radius); padding: 24px;
+      box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border);
+    }
+    .invite p { margin-bottom: 12px; font-size: 1rem; }
+    .invite p:last-child { margin-bottom: 0; }
+    .date {
+      display: flex; align-items: center; gap: 10px; background: var(--green-light);
+      padding: 12px 16px; border-radius: 12px; margin: 16px 0;
+      font-weight: 600; color: var(--green-dark); font-size: 0.95rem;
+    }
+    h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 16px; color: var(--green-dark); }
+    label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+    input[type="text"], input[type="password"], select, textarea {
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 1rem; font-family: inherit; background: #fff; color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s; margin-bottom: 16px; -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.15);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    .radio-group { display: flex; gap: 8px; margin-bottom: 16px; }
+    .radio-group label {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 12px 8px; border: 1.5px solid var(--border); border-radius: 10px;
+      cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: all 0.15s; margin-bottom: 0;
+    }
+    .radio-group input { display: none; }
+    .radio-group label:has(input:checked) { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
+    .radio-group label:has(input[value="nej"]:checked) { border-color: var(--danger); background: #FDEDEC; color: var(--danger); }
+    .radio-group label:has(input[value="kanske"]:checked) { border-color: var(--maybe); background: #FEF5E7; color: var(--maybe); }
+    button, .btn {
+      padding: 14px 20px; background: var(--green); color: white; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.15s, transform 0.1s;
+      font-family: inherit; display: inline-block; text-align: center;
+    }
+    button:hover, .btn:hover { background: var(--green-dark); }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: var(--muted); cursor: not-allowed; }
+    button.full { width: 100%; }
+    button.secondary { background: transparent; color: var(--green); border: 1.5px solid var(--border); }
+    button.danger { background: var(--danger); }
+    button.small { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+    .success { display: none; text-align: center; padding: 24px; }
+    .success.show { display: block; }
+    .success h3 { color: var(--green); margin-bottom: 8px; font-size: 1.25rem; }
+    .success p { color: var(--muted); }
+    footer { text-align: center; margin-top: 32px; font-size: 0.8rem; color: var(--muted); }
+    footer a, .admin-link a { color: var(--green); text-decoration: none; font-weight: 500; }
+    .admin-link { margin-top: 24px; text-align: center; }
+    .admin-link a { font-size: 0.8rem; color: var(--muted); }
+    .hidden { display: none !important; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat { background: var(--green-light); border-radius: 12px; padding: 16px 8px; text-align: center; }
+    .stat .num { font-size: 1.75rem; font-weight: 700; color: var(--green-dark); }
+    .stat .label { font-size: 0.75rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; }
+    .login-box { max-width: 320px; margin: 60px auto; text-align: center; }
+    .guest-list { list-style: none; }
+    .guest-item { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .guest-item:last-child { border-bottom: none; }
+    .guest-name { font-weight: 600; flex: 1; min-width: 120px; }
+    .badge { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+    .badge.ja { background: #D5F5E3; color: #0B6E4F; }
+    .badge.nej { background: #FADBD8; color: #C0392B; }
+    .badge.kanske { background: #FCF3CF; color: #B9770E; }
+    .badge.none { background: #EAECEE; color: #5A6B64; }
+    .invited-check { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+    .meta { width: 100%; font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+    .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .add-form { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .add-form.show { display: block; }
+    .error { color: var(--danger); font-size: 0.875rem; margin-bottom: 12px; }
+    a.back { display: inline-block; margin-bottom: 16px; color: var(--green); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+    @media (min-width: 480px) { .container { padding: 32px 20px 64px; } h1 { font-size: 2rem; } }
+  </style>
+</head>
+<body>
+  <div id="public-view">
+    <div class="container">
+      <header>
+        <div class="logo">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+          </svg>
+        </div>
+        <h1>AW-padel – 39 + 1</h1>
+        <p class="subtitle">Inbjudan</p>
+      </header>
+      <div class="card invite">
+        <p>Välkommen på lite gött häng och AW-padel för att fira att jag fyller 39 + 1!</p>
+        <div class="date">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Fredag 4 december 2026, kl. 17.00–20.00
+        </div>
+        <div class="date" style="margin-top:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          Självklart – Nordic Frillesås
+        </div>
+        <p>Vi siktar på start på 3 banor vid 17. Skicka gärna meddelande om du vill dyka upp senare 👍</p>
+        <p>Det bjuds på lite snittar och bärs. Ta med glatt humör så ses vi!</p>
+      </div>
+      <div class="card" id="form-card">
+        <h2>OSA</h2>
+        <form id="rsvp-form">
+          <label for="name">Ditt namn</label>
+          <input type="text" id="name" name="name" required placeholder="För- och efternamn" autocomplete="name">
+          <label>Kommer du?</label>
+          <div class="radio-group">
+            <label><input type="radio" name="rsvp" value="ja" required> Ja</label>
+            <label><input type="radio" name="rsvp" value="nej"> Nej</label>
+            <label><input type="radio" name="rsvp" value="kanske"> Kanske</label>
+          </div>
+          <label for="comment">Kommentar <span style="color:var(--muted);font-weight:400">(valfritt)</span></label>
+          <textarea id="comment" name="comment" placeholder="Allergier, meddelande..."></textarea>
+          <button type="submit" class="full" id="submit-btn">Skicka OSA</button>
+        </form>
+        <div class="success" id="success">
+          <h3>Tack!</h3>
+          <p>Din OSA är registrerad. Vi ses på banan!</p>
+        </div>
+      </div>
+      <div class="admin-link">
+        <a href="#admin" id="go-admin">Admin</a>
+      </div>
+      <footer>Mobilanpassad OSA · AW-padel 2026</footer>
+    </div>
+  </div>
+  <div id="admin-view" class="hidden">
+    <div class="container wide">
+      <a class="back" id="go-public">← Tillbaka till OSA</a>
+      <div id="login-section">
+        <div class="login-box card">
+          <h1>Admin</h1>
+          <p class="subtitle">AW-padel – 39 + 1</p>
+          <div id="login-error" class="error hidden"></div>
+          <input type="password" id="password" placeholder="Lösenord" autocomplete="current-password">
+          <button id="login-btn" class="full">Logga in</button>
+        </div>
+      </div>
+      <div id="dashboard" class="hidden">
+        <h1>Administration</h1>
+        <p class="subtitle">Gästlista och OSA-status</p>
+        <div class="stats">
+          <div class="stat"><div class="num" id="stat-ja">0</div><div class="label">Kommer</div></div>
+          <div class="stat"><div class="num" id="stat-kanske">0</div><div class="label">Kanske</div></div>
+          <div class="stat"><div class="num" id="stat-total">0</div><div class="label">Totalt OSA</div></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h2 style="font-size:1.1rem;margin:0;">Gäster</h2>
+            <button class="small secondary" id="toggle-add">+ Lägg till</button>
+          </div>
+          <div class="add-form" id="add-form">
+            <input type="text" id="new-name" placeholder="Namn på ny gäst">
+            <label class="invited-check" style="margin-bottom:12px;">
+              <input type="checkbox" id="new-invited" checked> Markera som bjuden
+            </label>
+            <button id="add-btn" class="small">Lägg till gäst</button>
+          </div>
+          <ul class="guest-list" id="guest-list"></ul>
+        </div>
+        <div class="actions">
+          <button class="secondary small" id="export-btn">Exportera CSV</button>
+          <button class="danger small" id="logout-btn">Logga ut</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const STORAGE_KEY = 'awpadel-rsvp-data-v1';
+    const ADMIN_PASS = 'padel40admin';
+    const DEFAULT_GUESTS = [
+      { id: '1', name: 'Louise', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '2', name: 'Håkan', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '3', name: 'Johan Falk', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '4', name: 'Daniel Billing', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '5', name: 'Peter Aakvist', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '6', name: 'Morten Stark', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '7', name: 'Joaquin Samuelsson', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '8', name: 'Lisa Banks', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '9', name: 'Cecilia', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '10', name: 'Johan', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '11', name: 'Anton Kärf', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '12', name: 'Robert Slantesson', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '13', name: 'Jesper Lindgren', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '14', name: 'Christian Sivla', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
+      { id: '15', name: 'Christoffer Frejfelt', invited: false, rsvp: null, arrival: null, comment: null, updated: null }
+    ];
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return { guests: JSON.parse(JSON.stringify(DEFAULT_GUESTS)), freeRsvps: [] };
+    }
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    function getAllGuests(data) {
+      return [...data.guests, ...data.freeRsvps];
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      saveData({ guests: JSON.parse(JSON.stringify(DEFAULT_GUESTS)), freeRsvps: [] });
+    }
+    document.getElementById('rsvp-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const rsvp = document.querySelector('input[name="rsvp"]:checked').value;
+      const comment = document.getElementById('comment').value.trim() || null;
+      const now = new Date().toISOString();
+      if (!name) return;
+      const data = loadData();
+      const lower = name.toLowerCase();
+      let found = data.guests.find(g => g.name.toLowerCase() === lower);
+      if (found) {
+        found.rsvp = rsvp;
+        found.arrival = null;
+        found.comment = comment;
+        found.updated = now;
+      } else {
+        data.freeRsvps.push({
+          id: 'f' + Date.now(),
+          name, invited: false, rsvp, arrival: null, comment, updated: now
+        });
+      }
+      saveData(data);
+      document.getElementById('rsvp-form').style.display = 'none';
+      document.getElementById('success').classList.add('show');
+    });
+    function showPublic() {
+      document.getElementById('public-view').classList.remove('hidden');
+      document.getElementById('admin-view').classList.add('hidden');
+      history.replaceState(null, '', location.pathname);
+    }
+    function showAdmin() {
+      document.getElementById('public-view').classList.add('hidden');
+      document.getElementById('admin-view').classList.remove('hidden');
+      if (sessionStorage.getItem('awpadel-admin') === '1') {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        renderAdmin();
+      } else {
+        document.getElementById('login-section').classList.remove('hidden');
+        document.getElementById('dashboard').classList.add('hidden');
+      }
+    }
+    document.getElementById('go-admin').addEventListener('click', function(e) {
+      e.preventDefault();
+      location.hash = 'admin';
+      showAdmin();
+    });
+    document.getElementById('go-public').addEventListener('click', function(e) {
+      e.preventDefault();
+      showPublic();
+    });
+    if (location.hash === '#admin') showAdmin();
+    document.getElementById('login-btn').addEventListener('click', tryLogin);
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryLogin();
+    });
+    function tryLogin() {
+      const pass = document.getElementById('password').value;
+      if (pass === ADMIN_PASS) {
+        sessionStorage.setItem('awpadel-admin', '1');
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        renderAdmin();
+      } else {
+        document.getElementById('login-error').textContent = 'Fel lösenord';
+        document.getElementById('login-error').classList.remove('hidden');
+      }
+    }
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      sessionStorage.removeItem('awpadel-admin');
+      document.getElementById('password').value = '';
+      showAdmin();
+    });
+    function renderAdmin() {
+      const data = loadData();
+      const all = getAllGuests(data);
+      const ja = all.filter(g => g.rsvp === 'ja').length;
+      const kanske = all.filter(g => g.rsvp === 'kanske').length;
+      const total = all.filter(g => g.rsvp).length;
+      document.getElementById('stat-ja').textContent = ja;
+      document.getElementById('stat-kanske').textContent = kanske;
+      document.getElementById('stat-total').textContent = total;
+      const list = document.getElementById('guest-list');
+      list.innerHTML = '';
+      all.sort((a, b) => {
+        if (a.invited !== b.invited) return a.invited ? -1 : 1;
+        return a.name.localeCompare(b.name, 'sv');
+      });
+      all.forEach(g => {
+        const li = document.createElement('li');
+        li.className = 'guest-item';
+        const badgeClass = g.rsvp || 'none';
+        const badgeText = g.rsvp ? g.rsvp.toUpperCase() : 'Ingen OSA';
+        li.innerHTML = `
+          <span class="guest-name">${escapeHtml(g.name)}</span>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <label class="invited-check">
+            <input type="checkbox" data-id="${g.id}" class="invited-toggle" ${g.invited ? 'checked' : ''}>
+            Bjuden
+          </label>
+          <button class="small danger remove-btn" data-id="${g.id}">Ta bort</button>
+          ${(g.arrival || g.comment || g.updated) ? `<div class="meta">
+            ${g.arrival ? 'Ankomst: ' + escapeHtml(g.arrival) + ' · ' : ''}
+            ${g.comment ? escapeHtml(g.comment) + ' · ' : ''}
+            ${g.updated ? 'Uppdaterad: ' + new Date(g.updated).toLocaleString('sv-SE') : ''}
+          </div>` : ''}
+        `;
+        list.appendChild(li);
+      });
+      document.querySelectorAll('.invited-toggle').forEach(cb => {
+        cb.addEventListener('change', function() {
+          const id = this.dataset.id;
+          const data = loadData();
+          let g = data.guests.find(x => x.id === id) || data.freeRsvps.find(x => x.id === id);
+          if (g) {
+            g.invited = this.checked;
+            saveData(data);
+            renderAdmin();
+          }
+        });
+      });
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (!confirm('Ta bort denna gäst?')) return;
+          const id = this.dataset.id;
+          const data = loadData();
+          data.guests = data.guests.filter(x => x.id !== id);
+          data.freeRsvps = data.freeRsvps.filter(x => x.id !== id);
+          saveData(data);
+          renderAdmin();
+        });
+      });
+    }
+    document.getElementById('toggle-add').addEventListener('click', () => {
+      document.getElementById('add-form').classList.toggle('show');
+    });
+    document.getElementById('add-btn').addEventListener('click', () => {
+      const name = document.getElementById('new-name').value.trim();
+      if (!name) return;
+      const invited = document.getElementById('new-invited').checked;
+      const data = loadData();
+      data.guests.push({
+        id: 'n' + Date.now(),
+        name, invited, rsvp: null, arrival: null, comment: null, updated: null
+      });
+      saveData(data);
+      document.getElementById('new-name').value = '';
+      document.getElementById('add-form').classList.remove('show');
+      renderAdmin();
+    });
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const data = loadData();
+      const all = getAllGuests(data);
+      let csv = 'Namn,Bjuden,OSA,Ankomst,Kommentar,Uppdaterad\n';
+      all.forEach(g => {
+        csv += `"${g.name}",${g.invited ? 'Ja' : 'Nej'},${g.rsvp || ''},"${g.arrival || ''}","${g.comment || ''}",${g.updated || ''}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'aw-padel-gaster.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
