@@ -155,7 +155,7 @@
       </div>
       <div class="card" id="form-card">
         <h2>OSA</h2>
-        <form id="rsvp-form">
+        <form id="rsvp-form" novalidate>
           <label for="name">Ditt namn</label>
           <input type="text" id="name" name="name" required placeholder="För- och efternamn" autocomplete="name">
           <label>Kommer du?</label>
@@ -262,9 +262,18 @@
     document.getElementById('rsvp-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
-      const rsvp = document.querySelector('input[name="rsvp"]:checked').value;
+      const checked = document.querySelector('input[name="rsvp"]:checked');
       const comment = document.getElementById('comment').value.trim() || null;
-      if (!name) return;
+      // Radioknapparna är dolda, så webbläsarens egen validering syns inte.
+      if (!name) {
+        showError('rsvp-error', 'Skriv ditt namn.');
+        return;
+      }
+      if (!checked) {
+        showError('rsvp-error', 'Välj Ja, Nej eller Kanske.');
+        return;
+      }
+      const rsvp = checked.value;
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
       btn.textContent = 'Skickar...';
@@ -436,9 +445,10 @@
         return;
       }
       const q = s => '"' + String(s || '').replace(/"/g, '""') + '"';
-      let csv = 'Namn,Bjuden,OSA,Ankomst,Kommentar,Uppdaterad\n';
+      // BOM och semikolon så att svensk Excel visar å/ä/ö och delar upp kolumnerna.
+      let csv = '﻿Namn;Bjuden;OSA;Ankomst;Kommentar;Uppdaterad\n';
       all.forEach(g => {
-        csv += `${q(g.name)},${g.invited ? 'Ja' : 'Nej'},${g.rsvp || ''},${q(g.arrival)},${q(g.comment)},${g.updated || ''}\n`;
+        csv += `${q(g.name)};${g.invited ? 'Ja' : 'Nej'};${g.rsvp || ''};${q(g.arrival)};${q(g.comment)};${g.updated || ''}\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);

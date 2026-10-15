@@ -76,7 +76,8 @@ begin
   values (v_name, p_rsvp, nullif(btrim(p_comment), ''), now())
   on conflict ((lower(name))) do update
     set rsvp = excluded.rsvp,
-        comment = excluded.comment,
+        -- Ett nytt svar utan kommentar behåller den gamla (t.ex. allergier).
+        comment = coalesce(excluded.comment, guests.comment),
         arrival = null,
         updated = excluded.updated,
         removed = false;
