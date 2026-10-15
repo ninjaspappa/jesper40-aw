@@ -1,32 +1,58 @@
 # AW-padel – 39 + 1 (OSA)
 
-Enkel, mobilanpassad OSA-sida för Jesper's 40-årsfest med AW-padel.
+Mobilanpassad OSA-sida för Jespers 40-årsfest med AW-padel, fredag 4 december
+2026 kl. 17–20 på Nordic Frillesås.
 
 ## Live
 
-- **Offentlig:** https://jesper40-aw.vercel.app
+- **OSA-sidan:** https://jesper40-aw.vercel.app
 - **Admin:** https://jesper40-aw.vercel.app/#admin
-  Lösenordet ligger inte i repot (repot är publikt). Det kontrolleras i databasen.
+  (ingen länk på sidan; lösenordet ligger i databasen, inte i repot)
+
+`main` deployas automatiskt till produktion av Vercel.
+
+## Admin: två separata listor
+
+- **OSA** – de riktiga svaren från gästerna (Ja/Kanske/Nej, ankomst,
+  kommentar). Ett svar kan döljas; det ligger kvar i databasen och kan tas
+  fram igen.
+- **Inbjudna** – din egen avbockningslista. Lägg till namn och bocka av när
+  du har bjudit in någon. Listan har ingen koppling till OSA:erna.
+
+Båda listorna kan laddas ner som CSV (öppnas direkt i svensk Excel).
 
 ## Lagring
 
-OSA:erna sparas i **Supabase**, i projektet *porty*, i ett eget schema `jesper40`
-så att det inte krockar med porty. Sidan pratar direkt med Supabase via
-`public.jesper40_*`-funktionerna; tabellerna går inte att nå direkt via API:t.
+Datan ligger i **Supabase**, i projektet *porty*, i ett eget schema
+`jesper40` så att det inte krockar med porty. Sidan pratar direkt med
+Supabase via `public.jesper40_*`-funktionerna; tabellerna går inte att nå
+direkt via API:t.
 
-- Gäster kan bara skicka in sin egen OSA (ett namn som redan finns uppdateras).
-- Admin (lista, lägga till, markera bjuden, ta bort, CSV) kräver lösenordet.
-- "Ta bort" döljer gästen i stället för att radera, så det går att ångra.
+- Gäster kan bara skicka in sin egen OSA. Svarar någon igen med samma namn
+  uppdateras svaret, och sidan säger till om namnet redan hade ett svar.
+- Allt i admin kräver lösenordet.
+- Varje inskick loggas i `jesper40.rsvp_log`, så ett överskrivet svar går
+  att hitta igen.
 
-Byta lösenord och ångra en borttagning: se kommentarerna sist i `schema.sql`.
+Byta lösenord, ta fram en dold OSA m.m.: se slutet av `schema.sql`.
 
 ## Filer
 
-- `index.html` – hela appen (offentlig OSA + admin)
-- `schema.sql` – schema, funktioner och seed-data, exakt som det ligger i Supabase
+- `index.html` – hela appen (publik OSA + admin), ingen byggprocess
+- `aw-padel-39plus1.ics` – kalenderfilen bakom "Kalender"-knappen
+- `og.png`, `favicon.svg`, `apple-touch-icon.png` – delningsbild och ikoner
+- `vercel.json` – säkerhetsheaders och noindex
+- `schema.sql` – schema och funktioner, som det ligger i produktion
+- `migrations/` – ändringar i databasen, i den ordning de körts
 
-## Gästlista (seed)
+`README.md`, `schema.sql` och `migrations/` publiceras inte på sajten (se
+`.vercelignore`).
 
-**Redan bjudna:** Louise, Håkan, Johan Falk, Daniel Billing
+## Testa lokalt
 
-**Ska bjudas:** Peter Aakvist, Morten Stark, Joaquin Samuelsson, Lisa Banks, Cecilia, Johan, Anton Kärf, Robert Slantesson, Jesper Lindgren, Christian Sivla, Christoffer Frejfelt
+```bash
+python3 -m http.server 5173
+```
+
+Öppna http://localhost:5173. Sidan pratar med den riktiga databasen, så
+ta bort eventuella test-OSA:er efteråt.

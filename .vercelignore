@@ -1,0 +1,4 @@
+# Bara själva sidan ska publiceras, inte dokumentation och SQL.
+README.md
+schema.sql
+migrations
