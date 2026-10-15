@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AW-padel 39+1//OSA//SV
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:aw-padel-39plus1-20261204@jesper40-aw.vercel.app
+DTSTAMP:20261015T180000Z
+DTSTART:20261204T160000Z
+DTEND:20261204T190000Z
+SUMMARY:AW-padel – 39 + 1
+LOCATION:Självklart – Nordic Frillesås
+DESCRIPTION:Start på 3 banor kl. 17. Det bjuds på snittar och bärs.
+  Ta med glatt humör! OSA: https://jesper40-aw.vercel.app/
+URL:https://jesper40-aw.vercel.app/
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:AW-padel – 39 + 1
+TRIGGER:-PT2H
+END:VALARM
+END:VEVENT
+END:VCALENDAR
