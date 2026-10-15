@@ -166,6 +166,7 @@
           </div>
           <label for="comment">Kommentar <span style="color:var(--muted);font-weight:400">(valfritt)</span></label>
           <textarea id="comment" name="comment" placeholder="Allergier, meddelande..."></textarea>
+          <div id="rsvp-error" class="error hidden"></div>
           <button type="submit" class="full" id="submit-btn">Skicka OSA</button>
         </form>
         <div class="success" id="success">
@@ -204,6 +205,7 @@
             <h2 style="font-size:1.1rem;margin:0;">Gäster</h2>
             <button class="small secondary" id="toggle-add">+ Lägg till</button>
           </div>
+          <div id="admin-error" class="error hidden"></div>
           <div class="add-form" id="add-form">
             <input type="text" id="new-name" placeholder="Namn på ny gäst">
             <label class="invited-check" style="margin-bottom:12px;">
@@ -221,70 +223,64 @@
     </div>
   </div>
   <script>
-    const STORAGE_KEY = 'awpadel-rsvp-data-v1';
-    const ADMIN_PASS = 'padel40admin';
-    const DEFAULT_GUESTS = [
-      { id: '1', name: 'Louise', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '2', name: 'Håkan', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '3', name: 'Johan Falk', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '4', name: 'Daniel Billing', invited: true, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '5', name: 'Peter Aakvist', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '6', name: 'Morten Stark', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '7', name: 'Joaquin Samuelsson', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '8', name: 'Lisa Banks', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '9', name: 'Cecilia', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '10', name: 'Johan', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '11', name: 'Anton Kärf', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '12', name: 'Robert Slantesson', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '13', name: 'Jesper Lindgren', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '14', name: 'Christian Sivla', invited: false, rsvp: null, arrival: null, comment: null, updated: null },
-      { id: '15', name: 'Christoffer Frejfelt', invited: false, rsvp: null, arrival: null, comment: null, updated: null }
-    ];
-    function loadData() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch (e) {}
-      return { guests: JSON.parse(JSON.stringify(DEFAULT_GUESTS)), freeRsvps: [] };
+    // Supabase (projektet "porty", schema jesper40). Nyckeln är den publika
+    // publishable-nyckeln: den ger bara åtkomst till jesper40_*-funktionerna,
+    // och admin-funktionerna kräver lösenordet. Se schema.sql.
+    const SUPABASE_URL = 'https://wnsdixavogxubwkauucj.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_KKAUZC5fc_mHYSaN2jrrnQ_nVRm2P3B';
+    const ADMIN_PASS_KEY = 'awpadel-admin-pass';
+
+    async function rpc(fn, args) {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(args)
+      });
+      const text = await res.text();
+      let body = null;
+      try { body = text ? JSON.parse(text) : null; } catch (e) {}
+      if (!res.ok) {
+        const err = new Error((body && body.message) || 'Något gick fel');
+        err.code = body && body.code;
+        throw err;
+      }
+      return body;
     }
-    function saveData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-    function getAllGuests(data) {
-      return [...data.guests, ...data.freeRsvps];
+    function adminPass() {
+      return sessionStorage.getItem(ADMIN_PASS_KEY);
     }
     function escapeHtml(str) {
       if (!str) return '';
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      saveData({ guests: JSON.parse(JSON.stringify(DEFAULT_GUESTS)), freeRsvps: [] });
+    function showError(id, message) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.classList.toggle('hidden', !message);
     }
-    document.getElementById('rsvp-form').addEventListener('submit', function(e) {
+
+    document.getElementById('rsvp-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
       const rsvp = document.querySelector('input[name="rsvp"]:checked').value;
       const comment = document.getElementById('comment').value.trim() || null;
-      const now = new Date().toISOString();
       if (!name) return;
-      const data = loadData();
-      const lower = name.toLowerCase();
-      let found = data.guests.find(g => g.name.toLowerCase() === lower);
-      if (found) {
-        found.rsvp = rsvp;
-        found.arrival = null;
-        found.comment = comment;
-        found.updated = now;
-      } else {
-        data.freeRsvps.push({
-          id: 'f' + Date.now(),
-          name, invited: false, rsvp, arrival: null, comment, updated: now
-        });
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Skickar...';
+      showError('rsvp-error', '');
+      try {
+        await rpc('jesper40_submit_rsvp', { p_name: name, p_rsvp: rsvp, p_comment: comment });
+        document.getElementById('rsvp-form').style.display = 'none';
+        document.getElementById('success').classList.add('show');
+      } catch (err) {
+        showError('rsvp-error', 'Kunde inte skicka din OSA. Försök igen om en stund.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Skicka OSA';
       }
-      saveData(data);
-      document.getElementById('rsvp-form').style.display = 'none';
-      document.getElementById('success').classList.add('show');
     });
+
     function showPublic() {
       document.getElementById('public-view').classList.remove('hidden');
       document.getElementById('admin-view').classList.add('hidden');
@@ -293,7 +289,7 @@
     function showAdmin() {
       document.getElementById('public-view').classList.add('hidden');
       document.getElementById('admin-view').classList.remove('hidden');
-      if (sessionStorage.getItem('awpadel-admin') === '1') {
+      if (adminPass()) {
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         renderAdmin();
@@ -312,30 +308,59 @@
       showPublic();
     });
     if (location.hash === '#admin') showAdmin();
+
     document.getElementById('login-btn').addEventListener('click', tryLogin);
     document.getElementById('password').addEventListener('keydown', e => {
       if (e.key === 'Enter') tryLogin();
     });
-    function tryLogin() {
+    async function tryLogin() {
       const pass = document.getElementById('password').value;
-      if (pass === ADMIN_PASS) {
-        sessionStorage.setItem('awpadel-admin', '1');
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true;
+      showError('login-error', '');
+      try {
+        const guests = await rpc('jesper40_admin_guests', { p_password: pass });
+        sessionStorage.setItem(ADMIN_PASS_KEY, pass);
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        renderAdmin();
-      } else {
-        document.getElementById('login-error').textContent = 'Fel lösenord';
-        document.getElementById('login-error').classList.remove('hidden');
+        renderGuests(guests);
+      } catch (err) {
+        showError('login-error', err.code === '28P01' ? 'Fel lösenord' : 'Kunde inte nå databasen. Försök igen.');
+      } finally {
+        btn.disabled = false;
       }
     }
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      sessionStorage.removeItem('awpadel-admin');
+    function logout() {
+      sessionStorage.removeItem(ADMIN_PASS_KEY);
       document.getElementById('password').value = '';
       showAdmin();
-    });
-    function renderAdmin() {
-      const data = loadData();
-      const all = getAllGuests(data);
+    }
+    document.getElementById('logout-btn').addEventListener('click', logout);
+
+    // Kör ett admin-anrop; loggar ut om lösenordet inte längre gäller.
+    async function adminCall(fn, args) {
+      try {
+        showError('admin-error', '');
+        return await rpc(fn, Object.assign({ p_password: adminPass() }, args));
+      } catch (err) {
+        if (err.code === '28P01') {
+          logout();
+        } else {
+          showError('admin-error', 'Något gick fel mot databasen. Försök igen.');
+        }
+        throw err;
+      }
+    }
+    async function renderAdmin() {
+      let guests;
+      try {
+        guests = await adminCall('jesper40_admin_guests', {});
+      } catch (err) {
+        return;
+      }
+      renderGuests(guests);
+    }
+    function renderGuests(all) {
       const ja = all.filter(g => g.rsvp === 'ja').length;
       const kanske = all.filter(g => g.rsvp === 'kanske').length;
       const total = all.filter(g => g.rsvp).length;
@@ -370,25 +395,19 @@
         list.appendChild(li);
       });
       document.querySelectorAll('.invited-toggle').forEach(cb => {
-        cb.addEventListener('change', function() {
-          const id = this.dataset.id;
-          const data = loadData();
-          let g = data.guests.find(x => x.id === id) || data.freeRsvps.find(x => x.id === id);
-          if (g) {
-            g.invited = this.checked;
-            saveData(data);
-            renderAdmin();
-          }
+        cb.addEventListener('change', async function() {
+          try {
+            await adminCall('jesper40_admin_set_invited', { p_id: Number(this.dataset.id), p_invited: this.checked });
+          } catch (err) {}
+          renderAdmin();
         });
       });
       document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
           if (!confirm('Ta bort denna gäst?')) return;
-          const id = this.dataset.id;
-          const data = loadData();
-          data.guests = data.guests.filter(x => x.id !== id);
-          data.freeRsvps = data.freeRsvps.filter(x => x.id !== id);
-          saveData(data);
+          try {
+            await adminCall('jesper40_admin_remove_guest', { p_id: Number(this.dataset.id) });
+          } catch (err) {}
           renderAdmin();
         });
       });
@@ -396,26 +415,30 @@
     document.getElementById('toggle-add').addEventListener('click', () => {
       document.getElementById('add-form').classList.toggle('show');
     });
-    document.getElementById('add-btn').addEventListener('click', () => {
+    document.getElementById('add-btn').addEventListener('click', async () => {
       const name = document.getElementById('new-name').value.trim();
       if (!name) return;
       const invited = document.getElementById('new-invited').checked;
-      const data = loadData();
-      data.guests.push({
-        id: 'n' + Date.now(),
-        name, invited, rsvp: null, arrival: null, comment: null, updated: null
-      });
-      saveData(data);
+      try {
+        await adminCall('jesper40_admin_add_guest', { p_name: name, p_invited: invited });
+      } catch (err) {
+        return;
+      }
       document.getElementById('new-name').value = '';
       document.getElementById('add-form').classList.remove('show');
       renderAdmin();
     });
-    document.getElementById('export-btn').addEventListener('click', () => {
-      const data = loadData();
-      const all = getAllGuests(data);
+    document.getElementById('export-btn').addEventListener('click', async () => {
+      let all;
+      try {
+        all = await adminCall('jesper40_admin_guests', {});
+      } catch (err) {
+        return;
+      }
+      const q = s => '"' + String(s || '').replace(/"/g, '""') + '"';
       let csv = 'Namn,Bjuden,OSA,Ankomst,Kommentar,Uppdaterad\n';
       all.forEach(g => {
-        csv += `"${g.name}",${g.invited ? 'Ja' : 'Nej'},${g.rsvp || ''},"${g.arrival || ''}","${g.comment || ''}",${g.updated || ''}\n`;
+        csv += `${q(g.name)},${g.invited ? 'Ja' : 'Nej'},${g.rsvp || ''},${q(g.arrival)},${q(g.comment)},${g.updated || ''}\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);

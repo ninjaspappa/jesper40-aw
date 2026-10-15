@@ -5,27 +5,28 @@ Enkel, mobilanpassad OSA-sida för Jesper's 40-årsfest med AW-padel.
 ## Live
 
 - **Offentlig:** https://jesper40-aw.vercel.app
-- **Admin:** https://jesper40-aw.vercel.app/#admin  
-  Lösenord: `padel40admin`
+- **Admin:** https://jesper40-aw.vercel.app/#admin
+  Lösenordet ligger inte i repot (repot är publikt). Det kontrolleras i databasen.
 
-## Nuvarande lagring
+## Lagring
 
-Just nu används `localStorage` (per webbläsare). För permanent lagring: koppla **Supabase**.
+OSA:erna sparas i **Supabase**, i projektet *porty*, i ett eget schema `jesper40`
+så att det inte krockar med porty. Sidan pratar direkt med Supabase via
+`public.jesper40_*`-funktionerna; tabellerna går inte att nå direkt via API:t.
 
-## Supabase-setup
+- Gäster kan bara skicka in sin egen OSA (ett namn som redan finns uppdateras).
+- Admin (lista, lägga till, markera bjuden, ta bort, CSV) kräver lösenordet.
+- "Ta bort" döljer gästen i stället för att radera, så det går att ångra.
 
-1. Skapa projekt på [supabase.com](https://supabase.com)
-2. Kör SQL i `schema.sql` (SQL Editor)
-3. Kopiera **Project URL** + **anon key** (Settings → API)
-4. Uppdatera sidan att använda Supabase istället för localStorage
+Byta lösenord och ångra en borttagning: se kommentarerna sist i `schema.sql`.
 
 ## Filer
 
 - `index.html` – hela appen (offentlig OSA + admin)
-- `schema.sql` – tabell + RLS + seed-data
+- `schema.sql` – schema, funktioner och seed-data, exakt som det ligger i Supabase
 
 ## Gästlista (seed)
 
-**Redan bjudna:** Louise, Håkan, Johan Falk, Daniel Billing  
+**Redan bjudna:** Louise, Håkan, Johan Falk, Daniel Billing
 
 **Ska bjudas:** Peter Aakvist, Morten Stark, Joaquin Samuelsson, Lisa Banks, Cecilia, Johan, Anton Kärf, Robert Slantesson, Jesper Lindgren, Christian Sivla, Christoffer Frejfelt
