@@ -92,9 +92,7 @@
     .success h3 { color: var(--green); margin-bottom: 8px; font-size: 1.25rem; }
     .success p { color: var(--muted); }
     footer { text-align: center; margin-top: 32px; font-size: 0.8rem; color: var(--muted); }
-    footer a, .admin-link a { color: var(--green); text-decoration: none; font-weight: 500; }
-    .admin-link { margin-top: 24px; text-align: center; }
-    .admin-link a { font-size: 0.8rem; color: var(--muted); }
+    footer a { color: inherit; text-decoration: none; font-weight: inherit; }
     .hidden { display: none !important; }
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
     .stat { background: var(--green-light); border-radius: 12px; padding: 16px 8px; text-align: center; }
@@ -174,10 +172,7 @@
           <p>Din OSA är registrerad. Vi ses på banan!</p>
         </div>
       </div>
-      <div class="admin-link">
-        <a href="#admin" id="go-admin">Admin</a>
-      </div>
-      <footer>Mobilanpassad OSA · AW-padel 2026</footer>
+      <footer>Mobilanpassad OSA · <a href="#admin" id="go-admin">AW-padel 2026</a></footer>
     </div>
   </div>
   <div id="admin-view" class="hidden">
@@ -246,8 +241,15 @@
       }
       return body;
     }
+    // Inloggningen sparas på enheten, så värden bara behöver logga in en gång.
     function adminPass() {
-      return sessionStorage.getItem(ADMIN_PASS_KEY);
+      try { return localStorage.getItem(ADMIN_PASS_KEY); } catch (e) { return null; }
+    }
+    function setAdminPass(pass) {
+      try {
+        if (pass) localStorage.setItem(ADMIN_PASS_KEY, pass);
+        else localStorage.removeItem(ADMIN_PASS_KEY);
+      } catch (e) {}
     }
     function escapeHtml(str) {
       if (!str) return '';
@@ -294,10 +296,12 @@
       document.getElementById('public-view').classList.remove('hidden');
       document.getElementById('admin-view').classList.add('hidden');
       history.replaceState(null, '', location.pathname);
+      window.scrollTo(0, 0);
     }
     function showAdmin() {
       document.getElementById('public-view').classList.add('hidden');
       document.getElementById('admin-view').classList.remove('hidden');
+      window.scrollTo(0, 0);
       if (adminPass()) {
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
@@ -329,7 +333,7 @@
       showError('login-error', '');
       try {
         const guests = await rpc('jesper40_admin_guests', { p_password: pass });
-        sessionStorage.setItem(ADMIN_PASS_KEY, pass);
+        setAdminPass(pass);
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         renderGuests(guests);
@@ -340,7 +344,7 @@
       }
     }
     function logout() {
-      sessionStorage.removeItem(ADMIN_PASS_KEY);
+      setAdminPass(null);
       document.getElementById('password').value = '';
       showAdmin();
     }

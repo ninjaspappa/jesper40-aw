@@ -147,6 +147,28 @@ begin
 end;
 $$;
 
+-- Avstängd: en lösenordsfri gästlista prövades och stängdes av direkt, så
+-- att gästernas namn och kommentarer inte går att läsa utan lösenord.
+create function public.jesper40_guest_overview()
+returns table (
+  id bigint,
+  name text,
+  invited boolean,
+  rsvp text,
+  arrival text,
+  comment text,
+  updated timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  raise exception 'Avstängd: gästlistan kräver lösenord' using errcode = '28P01';
+end;
+$$;
+
 -- Seed: redan bjudna + ska bjudas
 insert into jesper40.guests (name, invited) values
   ('Louise', true),
