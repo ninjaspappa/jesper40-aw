@@ -76,7 +76,8 @@ begin
   values (v_name, p_rsvp, nullif(btrim(p_comment), ''), now())
   on conflict ((lower(name))) do update
     set rsvp = excluded.rsvp,
-        comment = excluded.comment,
+        -- Ett nytt svar utan kommentar behåller den gamla (t.ex. allergier).
+        comment = coalesce(excluded.comment, guests.comment),
         arrival = null,
         updated = excluded.updated,
         removed = false;
@@ -143,6 +144,28 @@ as $$
 begin
   perform jesper40.require_admin(p_password);
   update jesper40.guests set removed = true where id = p_id;
+end;
+$$;
+
+-- Avstängd: en lösenordsfri gästlista prövades och stängdes av direkt, så
+-- att gästernas namn och kommentarer inte går att läsa utan lösenord.
+create function public.jesper40_guest_overview()
+returns table (
+  id bigint,
+  name text,
+  invited boolean,
+  rsvp text,
+  arrival text,
+  comment text,
+  updated timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  raise exception 'Avstängd: gästlistan kräver lösenord' using errcode = '28P01';
 end;
 $$;
 
