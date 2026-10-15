@@ -427,6 +427,7 @@
 
     footer.site-foot { text-align: center; padding: 26px 18px max(40px, env(safe-area-inset-bottom)); color: var(--muted); font-size: 0.85rem; }
     footer.site-foot .mini-ball { width: 16px; height: 16px; vertical-align: -3px; margin: 0 6px; }
+    footer.site-foot a { color: inherit; text-decoration: none; }
 
     /* Konfetti */
     .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
@@ -760,7 +761,7 @@
     </main>
 
     <footer class="site-foot">
-      39 + 1<svg class="mini-ball" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-ball"/></svg>AW-padel 2026
+      39 + 1<svg class="mini-ball" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-ball"/></svg><a href="#admin">AW-padel 2026</a>
     </footer>
   </div>
 
@@ -1303,7 +1304,8 @@
     // ================================================================
     var admin = { osa: [], invites: [], filter: 'all', tab: 'osa', pending: {} };
 
-    function adminPass() { return readStore('sessionStorage', ADMIN_PASS_KEY); }
+    // Inloggningen sparas på enheten, så värden bara behöver logga in en gång.
+    function adminPass() { return readStore('localStorage', ADMIN_PASS_KEY); }
 
     function enterAdmin() {
       var loggedIn = !!adminPass();
@@ -1328,7 +1330,7 @@
       showError('login-error', '');
       rpc('jesper40_admin_invites', { p_password: pass })
         .then(function () {
-          writeStore('sessionStorage', ADMIN_PASS_KEY, pass);
+          writeStore('localStorage', ADMIN_PASS_KEY, pass);
           $('password').value = '';
           enterAdmin();
         })
@@ -1342,7 +1344,7 @@
     });
 
     function logout(message) {
-      removeStore('sessionStorage', ADMIN_PASS_KEY);
+      removeStore('localStorage', ADMIN_PASS_KEY);
       admin.osa = [];
       admin.invites = [];
       admin.pending = {};

@@ -292,6 +292,29 @@ grant execute on function
   public.jesper40_admin_remove_invite(text, bigint)
 to anon;
 
+-- Avstängd: en lösenordsfri gästlista prövades och stängdes av direkt, så
+-- att gästernas namn och kommentarer inte går att läsa utan lösenord.
+-- Funktionen finns kvar i databasen men vägrar alla anrop.
+create function public.jesper40_guest_overview()
+returns table (
+  id bigint,
+  name text,
+  invited boolean,
+  rsvp text,
+  arrival text,
+  comment text,
+  updated timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  raise exception 'Avstängd: gästlistan kräver lösenord' using errcode = '28P01';
+end;
+$$;
+
 -- ---------- Drift ----------
 --
 -- Sätt eller byt adminlösenordet (kör i SQL Editor, checka inte in lösenordet).

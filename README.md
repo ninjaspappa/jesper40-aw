@@ -6,8 +6,9 @@ Mobilanpassad OSA-sida för Jespers 40-årsfest med AW-padel, fredag 4 december
 ## Live
 
 - **OSA-sidan:** https://jesper40-aw.vercel.app
-- **Admin:** https://jesper40-aw.vercel.app/#admin
-  (ingen länk på sidan; lösenordet ligger i databasen, inte i repot)
+- **Admin:** tryck på "AW-padel 2026" längst ner på sidan (eller gå till
+  https://jesper40-aw.vercel.app/#admin). Logga in en gång per enhet; inloggningen
+  sparas tills du trycker "Logga ut". Lösenordet ligger i databasen, inte i repot.
 
 `main` deployas automatiskt till produktion av Vercel.
 
